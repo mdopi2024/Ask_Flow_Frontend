@@ -31,7 +31,7 @@ import authService from "@/services/auth.sevices";
 const publicLinks = [
     { href: "/", label: "Home" },
     { href: "/#features", label: "Features" },
-    { href: "/#how-it-works", label: "How it works" },
+    { href: "/how-it-works", label: "How it works" },
     { href: "/#pricing", label: "Pricing" },
     { href: "/demo", label: "Demo", live: true },
 ];
@@ -47,15 +47,11 @@ const activeStyle = "bg-primary-soft text-primary";
 type User = { email: string; name?: string };
 type NavLink = { href: string; label: string; live?: boolean };
 
-// Decides which link gets the highlighted "active" style
 function isActive(pathname: string, href: string) {
-    if (href.includes("#")) return false; // landing page anchors are never "active"
+    if (href.includes("#")) return false;
     return pathname === href || pathname.startsWith(href + "/");
 }
 
-// SMALL BUILDING BLOCKS
-
-// Green pulsing "Live" badge
 function LiveBadge() {
     return (
         <span className="inline-flex items-center gap-1 rounded-full bg-teal px-1.5 py-0.5 text-[10px] font-semibold leading-none text-teal-foreground">
@@ -105,7 +101,6 @@ function DesktopLinks({ links, pathname }: { links: NavLink[]; pathname: string 
 
 // RIGHT SIDE (desktop)
 
-// Logged in: user icon with a dropdown (name + Log out)
 function UserMenu({
     user,
     onLogout,
@@ -278,11 +273,10 @@ export function Navbar() {
     const router = useRouter();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    // FIX: re-check the session after every navigation (e.g. login -> dashboard),
-    // so the user icon shows immediately without a manual reload.
+
     useEffect(() => {
         refetch();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
     }, [pathname]);
 
     const user: User | null = session?.user
