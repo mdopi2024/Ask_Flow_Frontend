@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { CircleUser, LogOut, Menu, MessageSquareText } from "lucide-react";
@@ -23,20 +23,17 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import { authClient } from "@/lib/auth";
+import authService from "@/services/auth.sevices";
 
-
-// TEMPORARY: change to true/false to preview both navbar states.
-const IS_LOGGED_IN = true;
-
-const MOCK_USER = { email: "demo@formchat.com", name: "Demo User" };
 
 // Links that always show in the middle
 const publicLinks = [
     { href: "/", label: "Home" },
     { href: "/#features", label: "Features" },
-    { href: "/# how-it-works", label: "How it works" },
+    { href: "/#how-it-works", label: "How it works" },
     { href: "/#pricing", label: "Pricing" },
-    { href: "/#demo", label: "Demo", live: true },
+    { href: "/demo", label: "Demo", live: true },
 ];
 
 // Extra link that shows only when the user is logged in
@@ -56,9 +53,7 @@ function isActive(pathname: string, href: string) {
     return pathname === href || pathname.startsWith(href + "/");
 }
 
-
-// SMALL BUILDING BLOCKS                                            
-
+// SMALL BUILDING BLOCKS
 
 // Green pulsing "Live" badge
 function LiveBadge() {
@@ -108,12 +103,18 @@ function DesktopLinks({ links, pathname }: { links: NavLink[]; pathname: string 
     );
 }
 
-
-/* 4. RIGHT SIDE (desktop)                                             */
-
+// RIGHT SIDE (desktop)
 
 // Logged in: user icon with a dropdown (name + Log out)
-function UserMenu({ user, onLogout }: { user: User; onLogout: () => void }) {
+function UserMenu({
+    user,
+    onLogout,
+    isLoggingOut,
+}: {
+    user: User;
+    onLogout: () => void;
+    isLoggingOut: boolean;
+}) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger
@@ -143,9 +144,13 @@ function UserMenu({ user, onLogout }: { user: User; onLogout: () => void }) {
 
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem variant="destructive" onClick={onLogout}>
+                <DropdownMenuItem
+                    variant="destructive"
+                    onClick={onLogout}
+                    disabled={isLoggingOut}
+                >
                     <LogOut className="h-4 w-4" />
-                    Log out
+                    {isLoggingOut ? "Logging out..." : "Log out"}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -164,20 +169,20 @@ function LoginButton() {
     );
 }
 
-
-/* 5. MOBILE MENU                                                      */
-
+// MOBILE MENU
 
 function MobileMenu({
     user,
     links,
     pathname,
     onLogout,
+    isLoggingOut,
 }: {
     user: User | null;
     links: NavLink[];
     pathname: string;
     onLogout: () => void;
+    isLoggingOut: boolean;
 }) {
     return (
         <Sheet>
@@ -241,11 +246,12 @@ function MobileMenu({
                                         variant="outline"
                                         className="border-border"
                                         onClick={onLogout}
+                                        disabled={isLoggingOut}
                                     />
                                 }
                             >
                                 <LogOut className="h-4 w-4" />
-                                Log out
+                                {isLoggingOut ? "Logging out..." : "Log out"}
                             </SheetClose>
                         </>
                     ) : (
@@ -264,20 +270,41 @@ function MobileMenu({
     );
 }
 
-
-/* 6. MAIN NAVBAR                                                      */
+// MAIN NAVBAR
 
 export function Navbar() {
+    const { data: session, isPending, refetch } = authClient.useSession();
     const pathname = usePathname();
     const router = useRouter();
-    const [loggedIn, setLoggedIn] = useState(IS_LOGGED_IN);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-    const user = loggedIn ? MOCK_USER : null;
+    // FIX: re-check the session after every navigation (e.g. login -> dashboard),
+    // so the user icon shows immediately without a manual reload.
+    useEffect(() => {
+        refetch();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pathname]);
+
+    const user: User | null = session?.user
+        ? { email: session.user.email, name: session.user.name }
+        : null;
+
     const links = user ? [...publicLinks, dashboardLink] : publicLinks;
 
-    function handleLogout() {
-        setLoggedIn(false);
-        router.push("/");
+    async function handleLogout() {
+        if (isLoggingOut) return;
+        setIsLoggingOut(true);
+
+        try {
+            await authService.signOut();
+        } catch (error) {
+            console.error("Sign out failed:", error);
+        } finally {
+            await refetch();
+            router.push("/login");
+            router.refresh();
+            setIsLoggingOut(false);
+        }
     }
 
     return (
@@ -294,12 +321,23 @@ export function Navbar() {
 
                 {/* Right */}
                 <div className="flex items-center gap-2">
-                    {user ? <UserMenu user={user} onLogout={handleLogout} /> : <LoginButton />}
+                    {isPending ? (
+                        <div className="hidden h-9 w-20 animate-pulse rounded-md bg-muted md:block" />
+                    ) : user ? (
+                        <UserMenu
+                            user={user}
+                            onLogout={handleLogout}
+                            isLoggingOut={isLoggingOut}
+                        />
+                    ) : (
+                        <LoginButton />
+                    )}
                     <MobileMenu
                         user={user}
                         links={links}
                         pathname={pathname}
                         onLogout={handleLogout}
+                        isLoggingOut={isLoggingOut}
                     />
                 </div>
             </nav>
