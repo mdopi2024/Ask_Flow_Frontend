@@ -30,7 +30,7 @@ import authService from "@/services/auth.sevices";
 // Links that always show in the middle
 const publicLinks = [
     { href: "/", label: "Home" },
-    { href: "/#features", label: "Features" },
+    { href: "/features", label: "Features" },
     { href: "/how-it-works", label: "How it works" },
     { href: "/#pricing", label: "Pricing" },
     { href: "/demo", label: "Demo", live: true },
