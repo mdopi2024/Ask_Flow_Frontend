@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { CircleUser, LogOut, Menu, MessageSquareText } from "lucide-react";
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/sheet";
 import { authClient } from "@/lib/auth";
 import authService from "@/services/auth.sevices";
+import { getSession } from "better-auth/api";
 
 
 // Links that always show in the middle
@@ -32,7 +33,6 @@ const publicLinks = [
     { href: "/", label: "Home" },
     { href: "/features", label: "Features" },
     { href: "/how-it-works", label: "How it works" },
-    { href: "/#pricing", label: "Pricing" },
     { href: "/demo", label: "Demo", live: true },
 ];
 
@@ -272,8 +272,6 @@ export function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
-
-
     useEffect(() => {
         refetch();
 
