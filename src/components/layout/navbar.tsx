@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { CircleUser, LogOut, Menu, MessageSquareText } from "lucide-react";
@@ -24,9 +24,6 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { authClient } from "@/lib/auth";
-import authService from "@/services/auth.sevices";
-import { getSession } from "better-auth/api";
-
 
 // Links that always show in the middle
 const publicLinks = [
@@ -272,9 +269,9 @@ export function Navbar() {
     const pathname = usePathname();
     const router = useRouter();
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+
     useEffect(() => {
         refetch();
-
     }, [pathname]);
 
     const user: User | null = session?.user
@@ -288,7 +285,8 @@ export function Navbar() {
         setIsLoggingOut(true);
 
         try {
-            await authService.signOut();
+            // Runs in the browser, so the cookie is cleared correctly
+            await authClient.signOut();
         } catch (error) {
             console.error("Sign out failed:", error);
         } finally {

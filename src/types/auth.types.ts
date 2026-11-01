@@ -22,6 +22,19 @@ export interface AuthUser {
     role?: string;
 }
 
+export enum Role {
+    ADMIN,
+    USER
+}
+export type GetAllUsersParams = {
+    page?: number;
+    limit?: number;
+    searchTerm?: string;
+    role?: Role; // use your roleEnum's inferred type
+    sortBy?: "createdAt" | "name" | "email" | "role";
+    sortOrder?: "asc" | "desc";
+};
+
 export interface AuthData {
     user: AuthUser;
     accessToken?: string;

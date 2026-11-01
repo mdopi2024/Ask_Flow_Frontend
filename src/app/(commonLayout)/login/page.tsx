@@ -8,10 +8,12 @@ import { isAxiosError } from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import authService from "@/services/auth.sevices";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import authService from "@/services/auth.sevices";
+import { authClient } from "@/lib/auth";
 
 const montserrat = Montserrat({
     subsets: ["latin"],
@@ -128,7 +130,12 @@ const LoginPage = () => {
                     email: value.email.trim(),
                     password: value.password,
                 });
+
+                // better-auth client-কে বলুন session আবার আনতে
+                await authClient.getSession({ query: { disableCookieCache: true } });
+
                 router.push("/");
+                router.refresh();
             } catch (err) {
                 setServerError(
                     isAxiosError(err)

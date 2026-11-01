@@ -2,15 +2,9 @@ import { ApiResponse, AuthData, SignInPayload, SignUpPayload } from "@/types/aut
 import axios from "axios";
 import { env } from "../../env";
 import { cookie } from "@/utils/catchCookie";
+import { api } from "@/lib/api";
 
-const envUrl = env
-
-const BASE_URL = envUrl.NEXT_PUBLIC_BACKEND_API_URL;
-const api = axios.create({
-    baseURL: BASE_URL,
-    withCredentials: true,
-    headers: { "Content-Type": "application/json" },
-});
+const envUrl = env;
 
 const authService = {
     getSession: async () => {
@@ -32,6 +26,7 @@ const authService = {
             return null;
         }
     },
+
     signUp: async (payload: SignUpPayload): Promise<ApiResponse<AuthData>> => {
         const { data } = await api.post<ApiResponse<AuthData>>("/auth/signup", payload);
         return data;
@@ -48,4 +43,4 @@ const authService = {
     },
 };
 
-export default authService
+export default authService;
