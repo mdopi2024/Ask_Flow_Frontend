@@ -23,8 +23,8 @@ export interface AuthUser {
 }
 
 export enum Role {
-    ADMIN,
-    USER
+    ADMIN = "ADMIN",
+    USER = "USER",
 }
 export type GetAllUsersParams = {
     page?: number;
