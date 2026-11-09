@@ -188,19 +188,27 @@ export function MyFormsTable({
 
     return (
         <section className="space-y-5">
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-5">
-                {statTiles.map((s, i) => (
-                    <div
-                        key={s.label}
-                        className={cn("bg-card px-5 py-4", i === statTiles.length - 1 && "col-span-2 md:col-span-1")}
-                    >
-                        <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                            {s.dot && <span className={cn("size-2 rounded-full", s.dot)} />}
-                            {s.label}
-                        </p>
-                        <p className="mt-1 text-2xl font-semibold tabular-nums text-card-foreground">{s.value}</p>
-                    </div>
-                ))}
+            <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-border bg-card md:grid-cols-5">
+                {statTiles.map((s, i) => {
+                    const isLast = i === statTiles.length - 1;
+                    return (
+                        <div
+                            key={s.label}
+                            className={cn(
+                                "border-border px-5 py-4",
+                                isLast
+                                    ? "col-span-2 md:col-span-1"
+                                    : cn("border-b md:border-b-0", i % 2 === 0 ? "border-r" : "md:border-r")
+                            )}
+                        >
+                            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                                {s.dot && <span className={cn("size-2 rounded-full", s.dot)} />}
+                                {s.label}
+                            </p>
+                            <p className="mt-1 text-2xl font-semibold tabular-nums text-card-foreground">{s.value}</p>
+                        </div>
+                    );
+                })}
             </div>
 
             <FormsFilters query={query} />
