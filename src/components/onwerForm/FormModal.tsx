@@ -271,7 +271,6 @@ function QuestionsList({ form }: { form: FormRow }) {
 
 
 function ResponsesList({ form }: { form: FormRow }) {
-    // TODO: fetch responses with your own action (e.g. getFormResponses(form.id)) and render them here.
     return (
         <div className="space-y-4">
             <DialogHeader>
