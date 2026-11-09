@@ -12,6 +12,10 @@ import {
 } from "@/types/forms.types";
 import { updateTag } from "next/cache";
 
+export type CreateFormResult =
+    | { ok: true; id?: string }
+    | { ok: false; message: string };
+
 export const getPublicForm = async (slug: string) => {
     return await formService.getPublicForm(slug);
 };
@@ -29,14 +33,26 @@ export const getFormById = async (id: string) => {
     return await formService.getFormById(id);
 };
 
-export const createForm = async (payload: CreateFormPayload) => {
-    const result = await formService.createForm(payload);
+export async function createFormAction(
+    payload: CreateFormPayload
+): Promise<CreateFormResult> {
+    try {
+        const res: any = await formService.createForm(payload);
 
-    updateTag(CACHE_TAGS.forms);
-    updateTag(CACHE_TAGS.myForms);
+        // Make the new form show up in "My forms" right away
+        updateTag(CACHE_TAGS.myForms);
 
-    return result;
-};
+        return { ok: true, id: res?.data?.id };
+    } catch (error: any) {
+        return {
+            ok: false,
+            message:
+                error?.response?.data?.message ??
+                error?.message ??
+                "Something went wrong while creating the form.",
+        };
+    }
+}
 
 export const updateForm = async (id: string, payload: UpdateFormPayload) => {
     const result = await formService.updateForm(id, payload);

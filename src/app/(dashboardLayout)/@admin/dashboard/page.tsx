@@ -1,3 +1,5 @@
+export const instant = false;
+
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { getAllForms } from "@/actions/forms/forms.acton";
@@ -13,7 +15,7 @@ function extractList(result: unknown, key: string): Dated[] {
   return Array.isArray(nested) ? (nested as Dated[]) : [];
 }
 
-// Send plain ISO strings to the client; it buckets them in the viewer's local time.
+
 function toIsoList(items: Dated[]): string[] {
   const out: string[] = [];
   for (const item of items) {
